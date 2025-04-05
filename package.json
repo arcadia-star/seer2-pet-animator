@@ -1,6 +1,6 @@
 {
   "name": "seer2-pet-animator",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "type": "module",
   "main": "./dist/pet-animator.umd.js",
   "module": "./dist/pet-animator.es.js",
