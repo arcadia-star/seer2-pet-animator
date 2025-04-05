@@ -89,7 +89,12 @@ package
             if (state == currentState)
                 return;
             if (activeAnimationMC)
+            {
+                activeAnimationMC.removeEventListener(Event.ENTER_FRAME, handleEnterFrame);
+                activeAnimationMC.removeEventListener("hit", handleInternalHit);
                 activeAnimationMC.stop();
+                activeAnimationMC = null; // 清除引用
+            }
 
             once(Event.FRAME_CONSTRUCTED, function(e:Event):void
                 {
@@ -128,6 +133,8 @@ package
                 activeAnimationMC = mc.getChildAt(0) as MovieClip;
                 if (activeAnimationMC)
                 {
+                    activeAnimationMC.removeEventListener(Event.ENTER_FRAME, handleEnterFrame);
+                    activeAnimationMC.removeEventListener("hit", handleInternalHit);
                     trace('setupEventListeners');
                     setupEventListeners(activeAnimationMC);
                 }
