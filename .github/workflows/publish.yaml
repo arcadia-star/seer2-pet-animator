@@ -26,9 +26,7 @@ jobs:
         run: pnpm install
       
       - name: Build package
-        run: |
-          cd $GITHUB_WORKSPACE
-          pnpm run build
+        run: pnpm run build
       
       - name: Publish to npm
         run: npm publish
