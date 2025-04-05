@@ -1,7 +1,9 @@
 {
   "name": "seer2-pet-animator",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "type": "module",
+  "main": "./dist/pet-animator.umd.js",
+  "module": "./dist/pet-animator.es.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
