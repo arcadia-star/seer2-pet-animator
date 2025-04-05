@@ -1,0 +1,30 @@
+{
+  "name": "seer2-pet-animator",
+  "version": "0.0.8",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/pet-render.cjs",
+      "import": "./dist/pet-render.js"
+    },
+    "./assets/*": "./dist/assets/*"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "@laynezh/vite-plugin-lib-assets": "^1.1.0",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.5"
+  }
+}
