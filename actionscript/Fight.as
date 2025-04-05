@@ -165,6 +165,7 @@ package
         {
             if (activeAnimationMC.currentFrame == activeAnimationMC.totalFrames)
             {
+                activeAnimationMC.removeEventListener(Event.ENTER_FRAME, handleEnterFrame);
                 handleAnimationComplete();
             }
         }
