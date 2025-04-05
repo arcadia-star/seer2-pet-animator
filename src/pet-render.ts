@@ -45,10 +45,21 @@ export class PetRenderer extends LitElement {
 
   private async _loadRuffle() {
     if (!(window as any).RufflePlayer) {
-      await import(
-        // @ts-ignore: External module without types
-        "https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle/ruffle.min.js"
-      );
+      const element = document.createElement("script");
+      element.src = "https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle/ruffle.min.js";
+      element.async = true;
+      const loadPromise = new Promise<void>((resolve) => {
+        element.onload = () => {
+          console.log("Ruffle loaded");
+          resolve();
+        };
+        element.onerror = () => {
+          console.error("Failed to load Ruffle");
+          resolve();
+        };
+      });
+      document.head.appendChild(element);
+      await loadPromise;
     }
     this._ruffleLoaded = true;
   }
