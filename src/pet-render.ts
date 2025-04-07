@@ -46,7 +46,8 @@ export class PetRenderer extends LitElement {
   private async _loadRuffle() {
     if (!(window as any).RufflePlayer) {
       const element = document.createElement("script");
-      element.src = "https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle/ruffle.min.js";
+      element.src =
+        "https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle/ruffle.min.js";
       element.async = true;
       const loadPromise = new Promise<void>((resolve) => {
         element.onload = () => {
@@ -115,14 +116,14 @@ export class PetRenderer extends LitElement {
         switch (eventName) {
           case "animationComplete":
             this.dispatchEvent(
-              new CustomEvent("animationComplete", {
+              new CustomEvent<AnimationCompleteEventDetail>("animationComplete", {
                 detail: eventData,
               })
             );
             break;
           case "hit":
             this.dispatchEvent(
-              new CustomEvent("hit", {
+              new CustomEvent<HitEventDetail>("hit", {
                 detail: eventData,
               })
             );
@@ -137,7 +138,7 @@ export class PetRenderer extends LitElement {
       if (e.data?.type === "petRenderCallbacksReady") {
         // 确保事件包含instanceId且匹配当前实例
         if (e.data.instanceId === this._instanceId) {
-          this.dispatchEvent(new CustomEvent("ready"));
+          this.dispatchEvent(new CustomEvent<BasePetEventDetail>("ready"));
         } else {
           console.debug(
             `忽略不匹配实例的回调就绪事件 (期望: ${this._instanceId}, 收到: ${e.data.instanceId})`
@@ -226,4 +227,31 @@ export class PetRenderer extends LitElement {
   }
 }
 
-export { ActionState } from "./actionState";
+interface BasePetEventDetail {
+  instanceId: string;
+}
+
+interface AnimationCompleteEventDetail extends BasePetEventDetail {
+  animationName: string;
+  loopCount?: number;
+}
+
+interface HitEventDetail extends BasePetEventDetail {
+  hitType: "click" | "collision";
+  position: {
+    x: number;
+    y: number;
+  };
+}
+
+export type PetRendererEvent ={
+  "animationComplete": CustomEvent<AnimationCompleteEventDetail>;
+  "hit": CustomEvent<HitEventDetail>;
+  "ready": CustomEvent<BasePetEventDetail>;
+}
+
+export type PetRendererAttributes =  'url' | 'reverse' | 'scale';
+
+export * from './DefineCustomElement';
+export * from './actionState';
+export * from './pet-render.vue';

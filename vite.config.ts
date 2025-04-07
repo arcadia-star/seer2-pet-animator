@@ -30,6 +30,9 @@ export default defineConfig({
       },
     },
     rollupOptions: {
+      // output:{
+      //   exports: "named",
+      // }
       //   external: /^lit/,
       // output: {
       //   globals: {
