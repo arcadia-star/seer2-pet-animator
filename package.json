@@ -6,12 +6,13 @@
   "module": "./dist/pet-animator.es.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build && tsc --emitDeclarationOnly && tsc-alias",
     "preview": "vite preview"
   },
   "types": "./src/pet-render.ts",
   "exports": {
     ".": {
+      "types": "./dist/pet-render.d.ts",
       "require": "./dist/pet-render.cjs",
       "import": "./dist/pet-render.js"
     },
@@ -28,6 +29,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.28.1",
     "@laynezh/vite-plugin-lib-assets": "^1.1.0",
+    "tsc-alias": "^1.8.13",
     "typescript": "^5.8.2",
     "vite": "^6.2.5",
     "vue": "^3.5.13"
