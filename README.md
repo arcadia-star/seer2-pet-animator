@@ -133,6 +133,30 @@ enum ActionState {
 }
 ```
 
+### 关于Vue+Vite下使用
+
+``` ts
+//vite.config.ts
+export default defineConfig({
+  optimizeDeps: {
+    // vite的依赖预构建功能无法正常引入我们使用的petContainer.swf，因此需要在这里排除
+    exclude: ['seer2-pet-animator'],
+  },
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          // 将pet-render视为自定义元素，以防止其被vue的编译插件所解析
+          // see: https://cn.vuejs.org/guide/extras/web-components.html#example-vite-config
+          isCustomElement: tag => tag.includes('-'),
+        },
+      },
+    }),
+  ],
+})
+
+```
+
 ### 环境要求
 
 - Node.js 22+
