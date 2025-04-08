@@ -27,6 +27,14 @@ package
         private function configureStage():void
         {
             stage.scaleMode = loaderInfo.parameters.scale || "noScale";
+
+            var offsetX:Number = Number(loaderInfo.parameters.offsetX) || 120;
+            var offsetY:Number = Number(loaderInfo.parameters.offsetY) || 50;
+
+            this.x = offsetX;
+            this.y = offsetY;
+            this.scaleX = Number(loaderInfo.parameters.scaleX) || 1;
+            this.scaleY = Number(loaderInfo.parameters.scaleY) || 1;
         }
 
         private function setupExternalInterface():void
@@ -36,6 +44,7 @@ package
                 ExternalInterface.addCallback("setState", setState);
                 ExternalInterface.addCallback("getState", getState);
                 ExternalInterface.addCallback("getAvailableStates", getAvailableStates);
+                ExternalInterface.addCallback("setOffset", setOffset);
             }
             catch (e:Error)
             {
@@ -102,6 +111,12 @@ package
                     initAnimateMovieClip(e);
                 });
             mc.gotoAndStop(state);
+        }
+
+        private function setOffset(x:Number, y:Number):void
+        {
+            this.x = x;
+            this.y = y;
         }
 
         private function initMovieClip(loader:Loader):void

@@ -29,6 +29,12 @@ export class PetRenderer extends LitElement {
   @property({ type: String }) url = "";
   @property({ type: Boolean }) reverse = false;
   @property({ type: String }) scale = "noscale";
+  @property({ type: Number }) offsetX = 120;
+  @property({ type: Number }) offsetY = 50;
+  @property({ type: Number }) scaleX = 1;
+  @property({ type: Number }) scaleY = 1;
+  @property({ type: String }) wmode = "transparent";
+  @property({ type: String }) salign = "";
 
   @state() private _player: any = null;
   private _instanceId = Math.random().toString(36).substring(2, 15);
@@ -87,13 +93,14 @@ export class PetRenderer extends LitElement {
     this._player.ruffle().load({
       url: this._buildSwfUrl(),
       allowScriptAccess: true,
-      wmode: "transparent",
+      wmode: this.wmode,
       autoplay: "on",
-      // logLevel: "debug",
       unmuteOverlay: "hidden",
       upgradeToHttps: window.location.protocol === "https:",
       splashScreen: false,
       scale: this.scale,
+      salign: this.salign,
+      menu: false,
     });
 
     if (!window.handleEventFromSWF) {
@@ -116,9 +123,12 @@ export class PetRenderer extends LitElement {
         switch (eventName) {
           case "animationComplete":
             this.dispatchEvent(
-              new CustomEvent<AnimationCompleteEventDetail>("animationComplete", {
-                detail: eventData,
-              })
+              new CustomEvent<AnimationCompleteEventDetail>(
+                "animationComplete",
+                {
+                  detail: eventData,
+                }
+              )
             );
             break;
           case "hit":
@@ -153,6 +163,10 @@ export class PetRenderer extends LitElement {
       url: this.url,
       instanceId: this._instanceId,
       scale: this.scale,
+      offsetX: this.offsetX.toString(),
+      offsetY: this.offsetY.toString(),
+      scaleX: this.scaleX.toString(),
+      scaleY: this.scaleY.toString(),
     });
     return `${petContainer}?${params}`;
   }
@@ -166,10 +180,20 @@ export class PetRenderer extends LitElement {
   }
 
   updated(changedProperties: Map<string, any>) {
-    if (changedProperties.has("url")) {
+    const reloadProps = [
+      "url",
+      "offsetX",
+      "offsetY",
+      "scaleX",
+      "scaleY",
+      "scale",
+      "wmode",
+      "salign",
+    ];
+    if (reloadProps.some((prop) => changedProperties.has(prop))) {
       this._reloadPlayer();
     }
-    if (changedProperties.has("reverse") || changedProperties.has("scale")) {
+    if (changedProperties.has("reverse")) {
       this._updatePlayerStyles();
     }
   }
@@ -244,14 +268,23 @@ interface HitEventDetail extends BasePetEventDetail {
   };
 }
 
-export type PetRendererEvent ={
-  "animationComplete": CustomEvent<AnimationCompleteEventDetail>;
-  "hit": CustomEvent<HitEventDetail>;
-  "ready": CustomEvent<BasePetEventDetail>;
-}
+export type PetRendererEvent = {
+  animationComplete: CustomEvent<AnimationCompleteEventDetail>;
+  hit: CustomEvent<HitEventDetail>;
+  ready: CustomEvent<BasePetEventDetail>;
+};
 
-export type PetRendererAttributes =  'url' | 'reverse' | 'scale';
+export type PetRendererAttributes =
+  | "url"
+  | "reverse"
+  | "scale"
+  | "offsetX"
+  | "offsetY"
+  | "scaleX"
+  | "scaleY"
+  | "wmode"
+  | "salign";
 
-export * from './DefineCustomElement';
-export * from './actionState';
-export * from './pet-render.vue';
+export * from "./DefineCustomElement";
+export * from "./actionState";
+export * from "./pet-render.vue";

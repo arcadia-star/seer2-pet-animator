@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -10,20 +10,47 @@
   </head>
   <body>
     <pet-render url="http://seer2.61.com/res/pet/fight/100.swf"></pet-render>
-    <div id="debug-controls" style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; color: white;">
+    <div
+      id="debug-controls"
+      style="
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+      "
+    >
       <h3>调试控制</h3>
-      <button onclick="document.querySelector('pet-render').setState('待机')">设置状态为待机</button>
-      <button onclick="document.querySelector('pet-render').setState('物理攻击')">设置状态为物理攻击</button>
-      <button onclick="console.log('当前状态:', document.querySelector('pet-render').getState())">获取当前状态</button>
-      <button onclick="console.log('可用状态:', document.querySelector('pet-render').getAvailableStates())">获取可用状态列表</button>
+      <button onclick="document.querySelector('pet-render').setState('待机')">
+        设置状态为待机
+      </button>
+      <button
+        onclick="document.querySelector('pet-render').setState('物理攻击')"
+      >
+        设置状态为物理攻击
+      </button>
+      <button
+        onclick="console.log('当前状态:', document.querySelector('pet-render').getState())"
+      >
+        获取当前状态
+      </button>
+      <button
+        onclick="console.log('可用状态:', document.querySelector('pet-render').getAvailableStates())"
+      >
+        获取可用状态列表
+      </button>
     </div>
   </body>
   <script type="module">
-    document.querySelector('pet-render').addEventListener('animationComplete', (event) => {
-      console.log('播放完毕:', event.detail);
-    });
-    document.querySelector('pet-render').addEventListener('hit', (event) => {
-      console.log('受击:', event.detail);
+    document
+      .querySelector("pet-render")
+      .addEventListener("animationComplete", (event) => {
+        console.log("播放完毕:", event.detail);
+      });
+    document.querySelector("pet-render").addEventListener("hit", (event) => {
+      console.log("受击:", event.detail);
     });
   </script>
 </html>
