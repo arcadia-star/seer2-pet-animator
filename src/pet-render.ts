@@ -218,6 +218,7 @@ export class PetRenderer extends LitElement {
   public setState(state: ActionState) {
     if (!this._player) return;
     try {
+      console.debug('setState',this._instanceId)
       this._player.setState(state);
     } catch (e) {
       console.error("调用setState失败:", e);
@@ -227,6 +228,7 @@ export class PetRenderer extends LitElement {
   public getState() {
     if (!this._player) return null;
     try {
+      console.debug('getState',this._instanceId)
       return this._player.getState();
     } catch (e) {
       console.error("调用getCurrentState失败:", e);
@@ -238,6 +240,7 @@ export class PetRenderer extends LitElement {
   public getAvailableStates() {
     if (!this._player) return [];
     try {
+      console.debug('getAvailableStates',this._instanceId)
       return this._player.getAvailableStates();
     } catch (e) {
       console.error("调用getAvailableStates失败:", e);
