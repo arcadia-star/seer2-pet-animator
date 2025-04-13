@@ -39,6 +39,7 @@ export class PetRenderer extends LitElement {
   @state() private _player: any = null;
   private _instanceId = Math.random().toString(36).substring(2, 15);
   private _ruffleLoaded = false;
+  private listener: ((e: Event) => void) | null = null;
 
   render() {
     return html`<div class="container"></div>`;
@@ -48,6 +49,7 @@ export class PetRenderer extends LitElement {
     await this._loadRuffle();
     this._createPlayer();
   }
+
 
   private async _loadRuffle() {
     if (!(window as any).RufflePlayer) {
@@ -103,6 +105,11 @@ export class PetRenderer extends LitElement {
       menu: false,
     });
 
+    this.listener = (e) => {
+      this.handleEvent.call(this,e)
+    }
+    window.addEventListener("message", this.listener );
+
     if (!window.handleEventFromSWF) {
       window.handleEventFromSWF = (eventName, data) => {
         console.debug(`收到 SWF 事件: ${eventName}`, data);
@@ -119,7 +126,6 @@ export class PetRenderer extends LitElement {
           );
           return;
         }
-
         switch (eventName) {
           case "animationComplete":
             this.dispatchEvent(
@@ -143,19 +149,19 @@ export class PetRenderer extends LitElement {
         }
       };
     }
+  }
 
-    window.addEventListener("message", (e) => {
-      if (e.data?.type === "petRenderCallbacksReady") {
-        // 确保事件包含instanceId且匹配当前实例
-        if (e.data.instanceId === this._instanceId) {
-          this.dispatchEvent(new CustomEvent<BasePetEventDetail>("ready"));
-        } else {
-          console.debug(
-            `忽略不匹配实例的回调就绪事件 (期望: ${this._instanceId}, 收到: ${e.data.instanceId})`
-          );
-        }
+  private handleEvent(e: any){
+    if (e.data?.type === "petRenderCallbacksReady") {
+      // 确保事件包含instanceId且匹配当前实例
+      if (e.data.instanceId === this._instanceId) {
+        this.dispatchEvent(new CustomEvent<BasePetEventDetail>("ready"));
+      } else {
+        console.debug(
+          `忽略不匹配实例的回调就绪事件 (期望: ${this._instanceId}, 收到: ${e.data.instanceId})`
+        );
       }
-    });
+    }
   }
 
   private _buildSwfUrl() {
@@ -218,7 +224,7 @@ export class PetRenderer extends LitElement {
   public setState(state: ActionState) {
     if (!this._player) return;
     try {
-      console.debug('setState',this._instanceId)
+      console.debug("setState", this._instanceId);
       this._player.setState(state);
     } catch (e) {
       console.error("调用setState失败:", e);
@@ -228,7 +234,7 @@ export class PetRenderer extends LitElement {
   public getState() {
     if (!this._player) return null;
     try {
-      console.debug('getState',this._instanceId)
+      console.debug("getState", this._instanceId);
       return this._player.getState();
     } catch (e) {
       console.error("调用getCurrentState失败:", e);
@@ -240,7 +246,7 @@ export class PetRenderer extends LitElement {
   public getAvailableStates() {
     if (!this._player) return [];
     try {
-      console.debug('getAvailableStates',this._instanceId)
+      console.debug("getAvailableStates", this._instanceId);
       return this._player.getAvailableStates();
     } catch (e) {
       console.error("调用getAvailableStates失败:", e);
@@ -251,6 +257,7 @@ export class PetRenderer extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._player?.remove();
+    if(this.listener) window.removeEventListener('hit',this.listener)
   }
 }
 
