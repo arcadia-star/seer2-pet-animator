@@ -75,19 +75,6 @@ package
             loader.load(new URLRequest(finalUrl));
         }
 
-        private function sendEvent(eventName:String, data:Object = null):void
-        {
-            if (ExternalInterface.available)
-            {
-                data.instanceId = loaderInfo.parameters.instanceId || '';
-                ExternalInterface.call("handleEventFromSWF", eventName, data);
-            }
-            else
-            {
-                trace("ExternalInterface 不可用");
-            }
-        }
-
         private function setState(state:String):void
         {
             if (!mc)
@@ -178,9 +165,11 @@ package
 
         private function handleInternalHit(e:Event):void
         {
-            sendEvent('hit', {
-                        state: getState()
-                    });
+            ExternalInterface.call("postMessage", {
+                type: 'hit',
+                state: getState(),
+                instanceId: loaderInfo.parameters.instanceId || ''
+            }, '*');
         }
 
         private function handleEnterFrame(e:Event):void
@@ -205,10 +194,12 @@ package
             }
             else
             {
-                sendEvent('animationComplete', {
-                            state: currentState,
-                            duration: getAnimationDuration()
-                        });
+                ExternalInterface.call("postMessage", {
+                    type: 'animationComplete', 
+                    state: currentState,
+                    duration: getAnimationDuration(),
+                    instanceId: loaderInfo.parameters.instanceId || ''
+                }, '*');
                 setState(FighterActionType.IDLE);
             }
         }

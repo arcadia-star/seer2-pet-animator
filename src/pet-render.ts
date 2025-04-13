@@ -105,62 +105,38 @@ export class PetRenderer extends LitElement {
       menu: false,
     });
 
-    this.listener = (e) => {
-      this.handleEvent.call(this,e)
-    }
-    window.addEventListener("message", this.listener );
-
-    if (!window.handleEventFromSWF) {
-      window.handleEventFromSWF = (eventName, data) => {
-        console.debug(`收到 SWF 事件: ${eventName}`, data);
-        // 确保所有事件都包含instanceId
-        const eventData = {
-          ...data,
-          instanceId: data?.instanceId || "",
-        };
-
-        // 只处理匹配当前实例ID的事件
-        if (eventData.instanceId !== this._instanceId) {
-          console.debug(
-            `忽略不匹配实例的事件: ${eventName} (期望: ${this._instanceId}, 收到: ${eventData.instanceId})`
-          );
-          return;
-        }
-        switch (eventName) {
-          case "animationComplete":
-            this.dispatchEvent(
-              new CustomEvent<AnimationCompleteEventDetail>(
-                "animationComplete",
-                {
-                  detail: eventData,
-                }
-              )
-            );
-            break;
-          case "hit":
-            this.dispatchEvent(
-              new CustomEvent<HitEventDetail>("hit", {
-                detail: eventData,
-              })
-            );
-            break;
-          default:
-            console.warn(`未知事件: ${eventName}`);
-        }
-      };
-    }
+    window.addEventListener("message", (e) => this.handleEvent(e));
   }
 
-  private handleEvent(e: any){
-    if (e.data?.type === "petRenderCallbacksReady") {
-      // 确保事件包含instanceId且匹配当前实例
-      if (e.data.instanceId === this._instanceId) {
-        this.dispatchEvent(new CustomEvent<BasePetEventDetail>("ready"));
-      } else {
-        console.debug(
-          `忽略不匹配实例的回调就绪事件 (期望: ${this._instanceId}, 收到: ${e.data.instanceId})`
-        );
-      }
+
+  private handleEvent(e: MessageEvent) {
+    if (!e.data || e.data.instanceId !== this._instanceId) return;
+    
+    switch (e.data.type) {
+      case 'animationComplete':
+        this.dispatchEvent(new CustomEvent('animationComplete', {
+          detail: {
+            state: e.data.state,
+            duration: e.data.duration,
+            instanceId: this._instanceId
+          }
+        }));
+        break;
+      case 'hit':
+        this.dispatchEvent(new CustomEvent('hit', {
+          detail: {
+            state: e.data.state,
+            instanceId: this._instanceId
+          }
+        }));
+        break;
+      case 'petRenderCallbacksReady':
+        this.dispatchEvent(new CustomEvent('ready', {
+          detail: {
+            instanceId: this._instanceId
+          }
+        }));
+        break;
     }
   }
 
