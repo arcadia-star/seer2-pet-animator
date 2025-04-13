@@ -40,16 +40,21 @@ export class PetRenderer extends LitElement {
   private _instanceId = Math.random().toString(36).substring(2, 15);
   private _ruffleLoaded = false;
   private listener: ((e: Event) => void) | null = null;
+  private loadedResolve?: () => void;
 
   render() {
     return html`<div class="container"></div>`;
   }
 
-  async firstUpdated() {
+  async connectedCallback() {
+    super.connectedCallback();
     await this._loadRuffle();
     this._createPlayer();
+    await new Promise<void>((resolve) => {
+      this.loadedResolve = resolve;
+    });
+    console.log(`pet-render ${this._instanceId} ready`)
   }
-
 
   private async _loadRuffle() {
     if (!(window as any).RufflePlayer) {
@@ -108,34 +113,40 @@ export class PetRenderer extends LitElement {
     window.addEventListener("message", (e) => this.handleEvent(e));
   }
 
-
   private handleEvent(e: MessageEvent) {
     if (!e.data || e.data.instanceId !== this._instanceId) return;
-    
+
     switch (e.data.type) {
-      case 'animationComplete':
-        this.dispatchEvent(new CustomEvent('animationComplete', {
-          detail: {
-            state: e.data.state,
-            duration: e.data.duration,
-            instanceId: this._instanceId
-          }
-        }));
+      case "animationComplete":
+        this.dispatchEvent(
+          new CustomEvent("animationComplete", {
+            detail: {
+              state: e.data.state,
+              duration: e.data.duration,
+              instanceId: this._instanceId,
+            },
+          })
+        );
         break;
-      case 'hit':
-        this.dispatchEvent(new CustomEvent('hit', {
-          detail: {
-            state: e.data.state,
-            instanceId: this._instanceId
-          }
-        }));
+      case "hit":
+        this.dispatchEvent(
+          new CustomEvent("hit", {
+            detail: {
+              state: e.data.state,
+              instanceId: this._instanceId,
+            },
+          })
+        );
         break;
-      case 'petRenderCallbacksReady':
-        this.dispatchEvent(new CustomEvent('ready', {
-          detail: {
-            instanceId: this._instanceId
-          }
-        }));
+      case "petRenderCallbacksReady":
+        this.dispatchEvent(
+          new CustomEvent("ready", {
+            detail: {
+              instanceId: this._instanceId,
+            },
+          })
+        );
+        if (this.loadedResolve) this.loadedResolve();
         break;
     }
   }
@@ -233,7 +244,7 @@ export class PetRenderer extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._player?.remove();
-    if(this.listener) window.removeEventListener('hit',this.listener)
+    if (this.listener) window.removeEventListener("hit", this.listener);
   }
 }
 
