@@ -39,7 +39,6 @@ export class PetRenderer extends LitElement {
   @state() private _player: any = null;
   private _instanceId = Math.random().toString(36).substring(2, 15);
   private _ruffleLoaded = false;
-  private listener: ((e: Event) => void) | null = null;
   private loadedResolve?: () => void;
 
   render() {
@@ -244,7 +243,7 @@ export class PetRenderer extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._player?.remove();
-    if (this.listener) window.removeEventListener("hit", this.listener);
+    if (this.handleEvent) window.removeEventListener("message", this.handleEvent);
   }
 }
 
