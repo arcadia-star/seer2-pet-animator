@@ -40,6 +40,7 @@ export class PetRenderer extends LitElement {
   private _instanceId = Math.random().toString(36).substring(2, 15);
   private _ruffleLoaded = false;
   private loadedResolve?: () => void;
+  private _readyPromise!: Promise<void>;
 
   render() {
     return html`<div class="container"></div>`;
@@ -47,12 +48,13 @@ export class PetRenderer extends LitElement {
 
   async connectedCallback() {
     super.connectedCallback();
-    await this._loadRuffle();
-    this._createPlayer();
-    await new Promise<void>((resolve) => {
+    this._readyPromise = new Promise<void>((resolve) => {
       this.loadedResolve = resolve;
     });
-    console.log(`pet-render ${this._instanceId} ready`)
+    await this._loadRuffle();
+    this._createPlayer();
+    await this._readyPromise;
+    console.log(`pet-render ${this._instanceId} ready`);
   }
 
   private async _loadRuffle() {
@@ -207,36 +209,34 @@ export class PetRenderer extends LitElement {
     this._player?.pause();
   }
 
-  public setState(state: ActionState) {
-    if (!this._player) return;
+  public async setState(state: ActionState) {
+    await this._readyPromise;
     try {
       console.debug("setState", this._instanceId);
       this._player.setState(state);
     } catch (e) {
-      console.error("调用setState失败:", e);
+      throw new Error(`调用setState失败: ${e}`);
     }
   }
 
-  public getState() {
-    if (!this._player) return null;
+  public async getState() {
+    await this._readyPromise;
     try {
       console.debug("getState", this._instanceId);
       return this._player.getState();
     } catch (e) {
-      console.error("调用getCurrentState失败:", e);
-      return null;
+      throw new Error(`调用getCurrentState失败: ${e}`);
     }
   }
 
   // 获取可用状态列表
-  public getAvailableStates() {
-    if (!this._player) return [];
+  public async getAvailableStates() {
+    await this._readyPromise;
     try {
       console.debug("getAvailableStates", this._instanceId);
       return this._player.getAvailableStates();
     } catch (e) {
-      console.error("调用getAvailableStates失败:", e);
-      return [];
+      throw new Error(`调用getAvailableStates失败: ${e}`);
     }
   }
 
