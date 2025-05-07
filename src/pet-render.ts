@@ -165,9 +165,17 @@ export class PetRenderer extends LitElement {
     return `${petContainer}?${params}`;
   }
 
+  private _updateScale() {
+    if (!this._player) return;
+
+    this._player.updateScale(this.scaleX, this.scaleY);
+  }
+
   private _updatePlayerStyles() {
     if (this._player) {
-      this._player.style.transform = this.reverse ? "scaleX(-1)" : "";
+      this._player.style.transform = `${
+        this.reverse ? "scaleX(-1) " : ""
+      }scale(${this.scaleX}, ${this.scaleY})`;
       this._player.style.width = "100%";
       this._player.style.height = "100%";
     }
@@ -178,12 +186,14 @@ export class PetRenderer extends LitElement {
       "url",
       "offsetX",
       "offsetY",
-      "scaleX",
-      "scaleY",
       "scale",
       "wmode",
       "salign",
     ];
+
+    if (changedProperties.has("scaleX") || changedProperties.has("scaleY")) {
+      this._updateScale();
+    }
     if (reloadProps.some((prop) => changedProperties.has(prop))) {
       this._reloadPlayer();
     }
@@ -243,7 +253,8 @@ export class PetRenderer extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._player?.remove();
-    if (this.handleEvent) window.removeEventListener("message", this.handleEvent);
+    if (this.handleEvent)
+      window.removeEventListener("message", this.handleEvent);
   }
 }
 

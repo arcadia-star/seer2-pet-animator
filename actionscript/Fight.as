@@ -45,6 +45,7 @@ package
                 ExternalInterface.addCallback("getState", getState);
                 ExternalInterface.addCallback("getAvailableStates", getAvailableStates);
                 ExternalInterface.addCallback("setOffset", setOffset);
+                ExternalInterface.addCallback("updateScale", updateScale);
             }
             catch (e:Error)
             {
@@ -104,6 +105,15 @@ package
         {
             this.x = x;
             this.y = y;
+        }
+        
+        private function updateScale(scaleX:Number, scaleY:Number):void {
+            this.scaleX = scaleX;
+            this.scaleY = scaleY;
+            if (activeAnimationMC) {
+                activeAnimationMC.scaleX = scaleX;
+                activeAnimationMC.scaleY = scaleY;
+            }
         }
 
         private function initMovieClip(loader:Loader):void
