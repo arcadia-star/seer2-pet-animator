@@ -181,7 +181,8 @@ export class PetRenderer extends LitElement {
     }
   }
 
-  updated(changedProperties: Map<string, any>) {
+  async updated(changedProperties: Map<string, any>) {
+    await this._readyPromise
     const reloadProps = [
       "url",
       "offsetX",
