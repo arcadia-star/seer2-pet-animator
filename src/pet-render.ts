@@ -2,6 +2,8 @@ import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { ActionState } from "./actionState";
 const petContainer = new URL("./assets/petContainer.swf", import.meta.url).href;
+
+let ruffleLoadPromise: Promise<void> | null = null;
 declare global {
   interface Window {
     handleEventFromSWF: (eventName: string, data: any) => void;
@@ -41,6 +43,7 @@ export class PetRenderer extends LitElement {
   private _ruffleLoaded = false;
   private loadedResolve?: () => void;
   private _readyPromise!: Promise<void>;
+  private _initialLoadComplete = false;
 
   render() {
     return html`<div class="container"></div>`;
@@ -54,27 +57,37 @@ export class PetRenderer extends LitElement {
     await this._loadRuffle();
     this._createPlayer();
     await this._readyPromise;
+    this._initialLoadComplete = true;
     console.log(`pet-render ${this._instanceId} ready`);
   }
 
   private async _loadRuffle() {
     if (!(window as any).RufflePlayer) {
-      const element = document.createElement("script");
-      element.src =
-        "https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle/ruffle.min.js";
-      element.async = true;
-      const loadPromise = new Promise<void>((resolve) => {
-        element.onload = () => {
-          console.log("Ruffle loaded");
-          resolve();
-        };
-        element.onerror = () => {
-          console.error("Failed to load Ruffle");
-          resolve();
-        };
-      });
-      document.head.appendChild(element);
-      await loadPromise;
+      if (!ruffleLoadPromise) {
+        ruffleLoadPromise = new Promise<void>((resolve, reject) => {
+          const element = document.createElement("script");
+          element.src =
+            "https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle/ruffle.min.js";
+          element.async = true;
+          element.onload = () => {
+            console.log("Ruffle loaded");
+            resolve();
+          };
+          element.onerror = () => {
+            console.error("Failed to load Ruffle");
+            ruffleLoadPromise = null; // Reset on error so it can be tried again
+            reject(new Error("Failed to load Ruffle"));
+          };
+          document.head.appendChild(element);
+        });
+      }
+      try {
+        await ruffleLoadPromise;
+      } catch (error) {
+        console.error("Ruffle loading failed:", error);
+        this._ruffleLoaded = false;
+        return; 
+      }
     }
     this._ruffleLoaded = true;
   }
@@ -195,7 +208,7 @@ export class PetRenderer extends LitElement {
     if (changedProperties.has("scaleX") || changedProperties.has("scaleY")) {
       this._updateScale();
     }
-    if (reloadProps.some((prop) => changedProperties.has(prop))) {
+    if (this._initialLoadComplete && reloadProps.some((prop) => changedProperties.has(prop))) {
       this._reloadPlayer();
     }
     if (changedProperties.has("reverse")) {
