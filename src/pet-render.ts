@@ -238,6 +238,12 @@ export class PetRenderer extends LitElement {
 
     try {
       console.debug("Loading new animation", this.url, this._instanceId);
+
+      // 重置ready状态，创建新的Promise
+      this._readyPromise = new Promise<void>((resolve) => {
+        this.loadedResolve = resolve;
+      });
+
       this._player.loadNewAnimation(this.url);
     } catch (e) {
       console.error("Failed to load new animation:", e);
