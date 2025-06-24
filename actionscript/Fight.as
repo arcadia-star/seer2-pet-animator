@@ -46,6 +46,7 @@ package
                 ExternalInterface.addCallback("getAvailableStates", getAvailableStates);
                 ExternalInterface.addCallback("setOffset", setOffset);
                 ExternalInterface.addCallback("updateScale", updateScale);
+                ExternalInterface.addCallback("loadNewAnimation", loadNewAnimation);
             }
             catch (e:Error)
             {
@@ -114,6 +115,33 @@ package
                 activeAnimationMC.scaleX = scaleX;
                 activeAnimationMC.scaleY = scaleY;
             }
+        }
+
+        public function loadNewAnimation(url:String):void
+        {
+            trace("Loading new animation:", url);
+
+            // 清理当前的动画状态
+            if (activeAnimationMC)
+            {
+                activeAnimationMC.removeEventListener(Event.ENTER_FRAME, handleEnterFrame);
+                activeAnimationMC.removeEventListener("hit", handleInternalHit);
+                activeAnimationMC.stop();
+                activeAnimationMC = null;
+            }
+
+            // 清理当前的mc
+            if (mc)
+            {
+                removeChild(mc);
+                mc = null;
+            }
+
+            // 重置状态
+            currentState = FighterActionType.BLANK;
+
+            // 加载新的动画
+            loadAnimation(url);
         }
 
         private function initMovieClip(loader:Loader):void

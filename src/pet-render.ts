@@ -186,9 +186,8 @@ export class PetRenderer extends LitElement {
 
   private _updatePlayerStyles() {
     if (this._player) {
-      this._player.style.transform = `${
-        this.reverse ? "scaleX(-1) " : ""
-      }scale(${this.scaleX}, ${this.scaleY})`;
+      // CSS层面只处理反转，其他缩放交给ActionScript处理
+      this._player.style.transform = this.reverse ? "scaleX(-1)" : "";
       this._player.style.width = "100%";
       this._player.style.height = "100%";
     }
@@ -197,7 +196,6 @@ export class PetRenderer extends LitElement {
   async updated(changedProperties: Map<string, any>) {
     await this._readyPromise
     const reloadProps = [
-      "url",
       "offsetX",
       "offsetY",
       "scale",
@@ -208,9 +206,20 @@ export class PetRenderer extends LitElement {
     if (changedProperties.has("scaleX") || changedProperties.has("scaleY")) {
       this._updateScale();
     }
-    if (this._initialLoadComplete && reloadProps.some((prop) => changedProperties.has(prop))) {
+
+    // 如果只是url变化，使用loadNewAnimation方法而不是重载整个player
+    if (this._initialLoadComplete && changedProperties.has("url") && changedProperties.size === 1) {
+      this._loadNewAnimation();
+    }
+    // 如果是其他需要重载的属性变化，则重载player
+    else if (this._initialLoadComplete && reloadProps.some((prop) => changedProperties.has(prop))) {
       this._reloadPlayer();
     }
+    // 如果url和其他属性同时变化，也需要重载player
+    else if (this._initialLoadComplete && changedProperties.has("url") && reloadProps.some((prop) => changedProperties.has(prop))) {
+      this._reloadPlayer();
+    }
+
     if (changedProperties.has("reverse")) {
       this._updatePlayerStyles();
     }
@@ -222,6 +231,19 @@ export class PetRenderer extends LitElement {
       this._player = null;
     }
     this._createPlayer();
+  }
+
+  private _loadNewAnimation() {
+    if (!this._player) return;
+
+    try {
+      console.debug("Loading new animation", this.url, this._instanceId);
+      this._player.loadNewAnimation(this.url);
+    } catch (e) {
+      console.error("Failed to load new animation:", e);
+      // 如果调用失败，回退到重载player
+      this._reloadPlayer();
+    }
   }
 
   // 公共方法

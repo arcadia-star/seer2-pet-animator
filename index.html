@@ -41,6 +41,23 @@
       >
         获取可用状态列表
       </button>
+      <br><br>
+      <h4>测试动态加载资源</h4>
+      <button
+        onclick="document.querySelector('pet-render').url = 'http://seer2.61.com/res/pet/fight/101.swf'"
+      >
+        切换到精灵101
+      </button>
+      <button
+        onclick="document.querySelector('pet-render').url = 'http://seer2.61.com/res/pet/fight/102.swf'"
+      >
+        切换到精灵102
+      </button>
+      <button
+        onclick="document.querySelector('pet-render').url = 'http://seer2.61.com/res/pet/fight/100.swf'"
+      >
+        切换回精灵100
+      </button>
     </div>
   </body>
   <script type="module">
