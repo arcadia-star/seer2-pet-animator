@@ -62,12 +62,17 @@ package
                     initMovieClip(loader);
                     reportAnimationInfo();
                     setState(FighterActionType.IDLE);
-                    ExternalInterface.call("postMessage",
-                            {
-                                type: 'petRenderCallbacksReady',
-                                instanceId: loaderInfo.parameters.instanceId
-                            },
-                            '*');
+
+                    // 延迟发送ready事件，确保labels完全初始化
+                    once(Event.FRAME_CONSTRUCTED, function(frameEvent:Event):void
+                    {
+                        ExternalInterface.call("postMessage",
+                                {
+                                    type: 'petRenderCallbacksReady',
+                                    instanceId: loaderInfo.parameters.instanceId
+                                },
+                                '*');
+                    });
                 });
             var finalUrl:String = url;
             if (url.indexOf("http://") === 0)
@@ -273,8 +278,16 @@ package
             if (!mc)
                 return [];
 
-            var availableStates:Array = [];
             var labels:Array = mc.currentLabels;
+
+            // 检查labels是否已经初始化且不为空
+            if (!labels || labels.length == 0)
+            {
+                trace("Warning: mc.currentLabels is not ready yet");
+                return [];
+            }
+
+            var availableStates:Array = [];
             var labelNames:Array = labels.map(function(item:Object, index:int, array:Array):String
                 {
                     return item.name;
