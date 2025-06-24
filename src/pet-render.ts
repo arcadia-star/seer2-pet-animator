@@ -194,7 +194,11 @@ export class PetRenderer extends LitElement {
   }
 
   async updated(changedProperties: Map<string, any>) {
-    await this._readyPromise
+    // 只有在初始加载完成后才等待ready状态
+    if (this._initialLoadComplete) {
+      await this._readyPromise;
+    }
+
     const reloadProps = [
       "offsetX",
       "offsetY",
@@ -210,14 +214,20 @@ export class PetRenderer extends LitElement {
     // 如果只是url变化，使用loadNewAnimation方法而不是重载整个player
     if (this._initialLoadComplete && changedProperties.has("url") && changedProperties.size === 1) {
       this._loadNewAnimation();
+      // URL切换后等待新的ready状态
+      await this._readyPromise;
     }
     // 如果是其他需要重载的属性变化，则重载player
     else if (this._initialLoadComplete && reloadProps.some((prop) => changedProperties.has(prop))) {
       this._reloadPlayer();
+      // 重载后等待ready状态
+      await this._readyPromise;
     }
     // 如果url和其他属性同时变化，也需要重载player
     else if (this._initialLoadComplete && changedProperties.has("url") && reloadProps.some((prop) => changedProperties.has(prop))) {
       this._reloadPlayer();
+      // 重载后等待ready状态
+      await this._readyPromise;
     }
 
     if (changedProperties.has("reverse")) {
@@ -230,6 +240,12 @@ export class PetRenderer extends LitElement {
       this.shadowRoot!.querySelector(".container")?.removeChild(this._player);
       this._player = null;
     }
+
+    // 重置ready状态，创建新的Promise
+    this._readyPromise = new Promise<void>((resolve) => {
+      this.loadedResolve = resolve;
+    });
+
     this._createPlayer();
   }
 
@@ -240,6 +256,7 @@ export class PetRenderer extends LitElement {
       console.debug("Loading new animation", this.url, this._instanceId);
 
       // 重置ready状态，创建新的Promise
+      // 重要：必须在调用loadNewAnimation之前创建新的Promise
       this._readyPromise = new Promise<void>((resolve) => {
         this.loadedResolve = resolve;
       });
