@@ -15,6 +15,7 @@ package
         private var mc:MovieClip;
         private var activeAnimationMC:MovieClip;
         private var currentState:String = FighterActionType.BLANK;
+        private var isLoading:Boolean = false;
 
         public function Fight()
         {
@@ -56,6 +57,7 @@ package
 
         private function loadAnimation(url:String):void
         {
+            isLoading = true;
             var loader:Loader = new Loader();
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(e:Event):void
                 {
@@ -66,6 +68,7 @@ package
                     // 延迟发送ready事件，确保labels完全初始化
                     once(Event.FRAME_CONSTRUCTED, function(frameEvent:Event):void
                     {
+                        isLoading = false;
                         ExternalInterface.call("postMessage",
                                 {
                                     type: 'petRenderCallbacksReady',
@@ -125,6 +128,9 @@ package
         public function loadNewAnimation(url:String):void
         {
             trace("Loading new animation:", url);
+
+            // 立即设置加载状态，防止在清理过程中获取到旧的states
+            isLoading = true;
 
             // 清理当前的动画状态
             if (activeAnimationMC)
@@ -275,6 +281,13 @@ package
 
         private function getAvailableStates():Array
         {
+            // 如果正在加载新动画，返回空数组
+            if (isLoading)
+            {
+                trace("Warning: Animation is still loading");
+                return [];
+            }
+
             if (!mc)
                 return [];
 

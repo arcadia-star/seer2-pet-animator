@@ -44,6 +44,7 @@ export class PetRenderer extends LitElement {
   private loadedResolve?: () => void;
   private _readyPromise!: Promise<void>;
   private _initialLoadComplete = false;
+  private _messageHandler?: (e: MessageEvent) => void;
 
   render() {
     return html`<div class="container"></div>`;
@@ -92,6 +93,13 @@ export class PetRenderer extends LitElement {
     this._ruffleLoaded = true;
   }
 
+  private _removeMessageListener() {
+    if (this._messageHandler) {
+      window.removeEventListener("message", this._messageHandler);
+      this._messageHandler = undefined;
+    }
+  }
+
   private _createPlayer() {
     if (!this._ruffleLoaded) return;
 
@@ -124,7 +132,12 @@ export class PetRenderer extends LitElement {
       menu: false,
     });
 
-    window.addEventListener("message", (e) => this.handleEvent(e));
+    // 清理旧的事件监听器
+    this._removeMessageListener();
+
+    // 创建新的事件监听器
+    this._messageHandler = (e) => this.handleEvent(e);
+    window.addEventListener("message", this._messageHandler);
   }
 
   private handleEvent(e: MessageEvent) {
@@ -236,6 +249,9 @@ export class PetRenderer extends LitElement {
   }
 
   private _reloadPlayer() {
+    // 清理事件监听器
+    this._removeMessageListener();
+
     if (this._player) {
       this.shadowRoot!.querySelector(".container")?.removeChild(this._player);
       this._player = null;
@@ -250,7 +266,10 @@ export class PetRenderer extends LitElement {
   }
 
   private _loadNewAnimation() {
-    if (!this._player) return;
+    if (!this._player) {
+      console.warn("Player not available for loadNewAnimation");
+      return;
+    }
 
     try {
       console.debug("Loading new animation", this.url, this._instanceId);
@@ -260,6 +279,13 @@ export class PetRenderer extends LitElement {
       this._readyPromise = new Promise<void>((resolve) => {
         this.loadedResolve = resolve;
       });
+
+      // 检查player是否有loadNewAnimation方法
+      if (typeof this._player.loadNewAnimation !== 'function') {
+        console.warn("loadNewAnimation method not available, falling back to reload");
+        this._reloadPlayer();
+        return;
+      }
 
       this._player.loadNewAnimation(this.url);
     } catch (e) {
@@ -280,6 +306,9 @@ export class PetRenderer extends LitElement {
 
   public async setState(state: ActionState) {
     await this._readyPromise;
+    if (!this._player) {
+      throw new Error("Player not available");
+    }
     try {
       console.debug("setState", this._instanceId);
       this._player.setState(state);
@@ -290,6 +319,9 @@ export class PetRenderer extends LitElement {
 
   public async getState() {
     await this._readyPromise;
+    if (!this._player) {
+      throw new Error("Player not available");
+    }
     try {
       console.debug("getState", this._instanceId);
       return this._player.getState();
@@ -301,6 +333,9 @@ export class PetRenderer extends LitElement {
   // 获取可用状态列表
   public async getAvailableStates() {
     await this._readyPromise;
+    if (!this._player) {
+      throw new Error("Player not available");
+    }
     try {
       console.debug("getAvailableStates", this._instanceId);
       return this._player.getAvailableStates();
@@ -311,9 +346,8 @@ export class PetRenderer extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    this._removeMessageListener();
     this._player?.remove();
-    if (this.handleEvent)
-      window.removeEventListener("message", this.handleEvent);
   }
 }
 
