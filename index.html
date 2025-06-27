@@ -9,7 +9,7 @@
     <script type="module" src="/src/pet-render.ts"></script>
   </head>
   <body>
-    <pet-render url="http://seer2.61.com/res/pet/fight/100.swf"></pet-render>
+    <pet-render url="http://seer2.61.com/res/pet/fight/100.swf" force-https="false"></pet-render>
     <div
       id="debug-controls"
       style="
@@ -57,6 +57,18 @@
         onclick="document.querySelector('pet-render').url = 'http://seer2.61.com/res/pet/fight/100.swf'"
       >
         切换回精灵100
+      </button>
+      <br><br>
+      <h4>测试HTTPS强制转换</h4>
+      <button
+        onclick="document.querySelector('pet-render').forceHttps = true; console.log('已启用强制HTTPS');"
+      >
+        启用强制HTTPS
+      </button>
+      <button
+        onclick="document.querySelector('pet-render').forceHttps = false; console.log('已禁用强制HTTPS');"
+      >
+        禁用强制HTTPS
       </button>
     </div>
   </body>

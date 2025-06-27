@@ -30,6 +30,7 @@ export class PetRenderer extends LitElement {
 
   @property({ type: String }) url = "";
   @property({ type: Boolean }) reverse = false;
+  @property({ type: Boolean }) forceHttps = false;
   @property({ type: String }) scale = "noscale";
   @property({ type: Number }) offsetX = 120;
   @property({ type: Number }) offsetY = 50;
@@ -187,6 +188,7 @@ export class PetRenderer extends LitElement {
       offsetY: this.offsetY.toString(),
       scaleX: this.scaleX.toString(),
       scaleY: this.scaleY.toString(),
+      forceHttps: this.forceHttps.toString(),
     });
     return `${petContainer}?${params}`;
   }
@@ -218,6 +220,7 @@ export class PetRenderer extends LitElement {
       "scale",
       "wmode",
       "salign",
+      "forceHttps",
     ];
 
     if (changedProperties.has("scaleX") || changedProperties.has("scaleY")) {
@@ -377,6 +380,7 @@ export type PetRendererEvent = {
 export type PetRendererAttributes =
   | "url"
   | "reverse"
+  | "forceHttps"
   | "scale"
   | "offsetX"
   | "offsetY"

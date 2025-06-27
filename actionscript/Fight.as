@@ -77,11 +77,14 @@ package
                                 '*');
                     });
                 });
+
             var finalUrl:String = url;
-            if (url.indexOf("http://") === 0)
+            var forceHttps:String = loaderInfo.parameters.forceHttps || "false";
+            if (forceHttps === "true" && url.indexOf("http://") === 0)
             {
                 finalUrl = url.replace("http://", "https://");
             }
+
             loader.load(new URLRequest(finalUrl));
         }
 

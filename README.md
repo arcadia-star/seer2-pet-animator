@@ -40,7 +40,14 @@ import 'seer2-pet-animator'
 </script>
 
 <template>
+    <!-- 基本用法 -->
     <pet-render url="http://seer2.61.com/res/pet/fight/100.swf"></pet-render>
+
+    <!-- 强制使用HTTPS -->
+    <pet-render
+      url="http://seer2.61.com/res/pet/fight/100.swf"
+      :force-https="true">
+    </pet-render>
 </template>
 ```
 
@@ -56,6 +63,7 @@ import 'seer2-pet-animator'
 |------------|-----------|------------|----------------------------------------------------------------------|
 | `url`      | String    | ""         | SWF动画文件的URL地址 (必需)                                          |
 | `reverse`  | Boolean   | false      | 是否反转动画播放方向                                                 |
+| `forceHttps` | Boolean | false      | 是否强制将HTTP URL转换为HTTPS URL                                    |
 | `scale`    | String    | "noscale"  | 缩放模式，可选值同Flash的StageScaleMode（如 "noScale", "showAll" 等）|
 
 ### 方法（Methods）
